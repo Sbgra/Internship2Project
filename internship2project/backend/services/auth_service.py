@@ -6,14 +6,14 @@ import sqlite3
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from jose import JWTError, jwt
 from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+from jose import JWTError, jwt
 
 SECRET_KEY = "change-this-in-production-very-secret-key-2024"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 saat
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 # ── Şifre ─────────────────────────────────────────────────────────
@@ -23,7 +23,10 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    try:
+        return pwd_context.verify(plain, hashed)
+    except Exception:
+        return False
 
 
 # ── JWT ───────────────────────────────────────────────────────────
