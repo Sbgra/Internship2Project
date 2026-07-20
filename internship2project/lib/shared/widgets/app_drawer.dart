@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../data/services/auth_service.dart';
 
-/// Basit yan menü.
+/// Yan menü — yeni özellikler eklendi.
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
@@ -21,7 +21,7 @@ class AppDrawer extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 const Text(
-                  'Inkwell',
+                  'MyPlatform',
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
@@ -40,6 +40,14 @@ class AppDrawer extends StatelessWidget {
               Navigator.of(context).pushReplacementNamed('/');
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.groups),
+            title: const Text('Topluluklar'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.of(context).pushNamed('/communities');
+            },
+          ),
           if (auth.isLoggedIn) ...[
             ListTile(
               leading: const Icon(Icons.edit),
@@ -56,6 +64,31 @@ class AppDrawer extends StatelessWidget {
                 Navigator.pop(context);
                 Navigator.of(context)
                     .pushNamed('/profile', arguments: auth.currentUser!.id);
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.menu_book),
+              title: const Text('Dergilerim'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).pushNamed('/magazines');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.bookmark),
+              title: const Text('Çevrimdışı Makaleler'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).pushNamed('/offline-articles');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.palette),
+              title: const Text('Uygulama İkonu'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).pushNamed('/settings/icon');
               },
             ),
             const Divider(),

@@ -50,6 +50,12 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
       }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Beklenmeyen hata: $e')),
+        );
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }

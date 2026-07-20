@@ -4,12 +4,18 @@ class UserPublicModel {
   final int id;
   final String username;
   final String? bio;
+  final String? profilePicture;
+  final String? profileColor;
+  final String? emotes;
   final DateTime createdAt;
 
   const UserPublicModel({
     required this.id,
     required this.username,
     this.bio,
+    this.profilePicture,
+    this.profileColor,
+    this.emotes,
     required this.createdAt,
   });
 
@@ -18,6 +24,9 @@ class UserPublicModel {
       id: json['id'] as int,
       username: json['username'] as String,
       bio: json['bio'] as String?,
+      profilePicture: json['profile_picture'] as String?,
+      profileColor: json['profile_color'] as String?,
+      emotes: json['emotes'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
@@ -32,6 +41,9 @@ class UserProfileModel {
   final String username;
   final String email;
   final String? bio;
+  final String? profilePicture;
+  final String? profileColor;
+  final String? emotes;
   final DateTime createdAt;
   final int articleCount;
 
@@ -40,6 +52,9 @@ class UserProfileModel {
     required this.username,
     required this.email,
     this.bio,
+    this.profilePicture,
+    this.profileColor,
+    this.emotes,
     required this.createdAt,
     required this.articleCount,
   });
@@ -50,6 +65,9 @@ class UserProfileModel {
       username: json['username'] as String,
       email: json['email'] as String,
       bio: json['bio'] as String?,
+      profilePicture: json['profile_picture'] as String?,
+      profileColor: json['profile_color'] as String?,
+      emotes: json['emotes'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       articleCount: json['article_count'] as int? ?? 0,
     );

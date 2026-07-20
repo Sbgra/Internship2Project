@@ -6,13 +6,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import init_db
-from routers import auth, articles, feed, users
+from routers import auth, articles, feed, users, stats, claps, communities, magazines, settings, highlights
 
 # Uygulama başlarken tabloları oluştur
 init_db()
 
 app = FastAPI(
-    title="Inkwell API",
+    title="MyAPP API",
     description="Makale platformu — sqlite3 + FastAPI",
     version="1.0.0",
 )
@@ -29,8 +29,14 @@ app.include_router(auth.router)
 app.include_router(articles.router)
 app.include_router(feed.router)
 app.include_router(users.router)
+app.include_router(stats.router)
+app.include_router(claps.router)
+app.include_router(highlights.router)
+app.include_router(communities.router)
+app.include_router(magazines.router)
+app.include_router(settings.router)
 
 
 @app.get("/", tags=["Health"])
 def health():
-    return {"status": "ok", "message": "Inkwell API çalışıyor"}
+    return {"status": "ok", "message": "MyPlatform API çalışıyor"}

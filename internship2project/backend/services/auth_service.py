@@ -82,3 +82,13 @@ def update_bio(conn: sqlite3.Connection, user_id: int, bio: Optional[str]) -> di
     conn.execute("UPDATE users SET bio = ? WHERE id = ?", (bio, user_id))
     conn.commit()
     return get_user_by_id(conn, user_id)
+
+def update_profile(conn: sqlite3.Connection, user_id: int, data: dict) -> dict:
+    allowed = {"profile_picture", "profile_color", "emotes"}
+    fields = {k: v for k, v in data.items() if k in allowed}
+    if fields:
+        set_parts = [f"{k} = ?" for k in fields]
+        values = list(fields.values()) + [user_id]
+        conn.execute(f"UPDATE users SET {', '.join(set_parts)} WHERE id = ?", values)
+        conn.commit()
+    return get_user_by_id(conn, user_id)

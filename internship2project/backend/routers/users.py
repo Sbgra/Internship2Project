@@ -5,10 +5,10 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from database import get_db
 from dependencies import get_current_user
-from schemas.user import UserProfile, UserPublic, UserUpdateBio
+from schemas.user import UserProfile, UserPublic, UserUpdateBio, UserUpdateProfile
 from schemas.article import ArticleListItem
 from services import article_service
-from services.auth_service import get_user_by_id, update_bio
+from services.auth_service import get_user_by_id, update_bio, update_profile
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -45,4 +45,15 @@ def update_my_bio(
 ):
     """Giriş yapan kullanıcının biyografisini günceller."""
     updated = update_bio(conn, current_user["id"], data.bio)
+    return UserPublic(**updated)
+
+
+@router.patch("/me/profile_customization", response_model=UserPublic)
+def update_my_profile(
+    data: UserUpdateProfile,
+    current_user: dict = Depends(get_current_user),
+    conn: sqlite3.Connection = Depends(get_db),
+):
+    """Giriş yapan kullanıcının profil özelleştirmelerini (renk, resim, emote) günceller."""
+    updated = update_profile(conn, current_user["id"], data.model_dump(exclude_unset=True))
     return UserPublic(**updated)

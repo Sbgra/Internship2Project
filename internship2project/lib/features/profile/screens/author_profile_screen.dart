@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/article_model.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/services/article_service.dart';
 import '../../../data/services/api_service.dart';
+import '../../../data/services/auth_service.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../widgets/profile_header.dart';
 
@@ -55,6 +57,26 @@ class _AuthorProfileScreenState extends State<AuthorProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_profile?.username ?? 'Profil'),
+        actions: [
+          if (_profile != null)
+            Consumer<AuthService>(
+              builder: (context, auth, child) {
+                if (auth.isLoggedIn && auth.currentUser!.id == widget.userId) {
+                  return IconButton(
+                    icon: const Icon(Icons.edit),
+                    onPressed: () async {
+                      final updated = await Navigator.of(context).pushNamed('/edit-profile');
+                      if (updated == true && mounted) {
+                        _load(); // Reload profile
+                      }
+                    },
+                    tooltip: 'Profili Düzenle',
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+        ],
       ),
       body: _loading
           ? const LoadingIndicator()

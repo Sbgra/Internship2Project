@@ -7,7 +7,16 @@ import 'features/auth/screens/register_screen.dart';
 import 'features/feed/screens/feed_screen.dart';
 import 'features/articles/screens/article_detail_screen.dart';
 import 'features/articles/screens/create_article_screen.dart';
+import 'features/articles/screens/offline_articles_screen.dart';
 import 'features/profile/screens/author_profile_screen.dart';
+import 'features/communities/screens/communities_screen.dart';
+import 'features/communities/screens/community_detail_screen.dart';
+import 'features/communities/screens/create_community_screen.dart';
+import 'features/magazines/screens/magazines_screen.dart';
+import 'features/magazines/screens/magazine_detail_screen.dart';
+import 'features/magazines/screens/create_magazine_screen.dart';
+import 'features/profile/screens/edit_profile_screen.dart';
+import 'features/settings/screens/app_icon_settings_screen.dart';
 import 'shared/widgets/loading_indicator.dart';
 
 /// Uygulamanın kök widget'ı.
@@ -20,7 +29,7 @@ class App extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => AuthService()..init(),
       child: MaterialApp(
-        title: 'Inkwell',
+        title: 'MyPlatform',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,
         home: const _AppGate(),
@@ -49,6 +58,40 @@ class App extends StatelessWidget {
         return MaterialPageRoute(
           builder: (_) => AuthorProfileScreen(userId: id),
         );
+      // Çevrimdışı makaleler — sadece üyeler
+      case '/offline-articles':
+        return MaterialPageRoute(
+            builder: (_) => const OfflineArticlesScreen());
+      // Topluluklar
+      case '/communities':
+        return MaterialPageRoute(
+            builder: (_) => const CommunitiesScreen());
+      case '/community':
+        final id = settings.arguments as int;
+        return MaterialPageRoute(
+          builder: (_) => CommunityDetailScreen(communityId: id),
+        );
+      case '/create-community':
+        return MaterialPageRoute(
+            builder: (_) => const CreateCommunityScreen());
+      // Dergiler — sadece üyeler
+      case '/magazines':
+        return MaterialPageRoute(builder: (_) => const MagazinesScreen());
+      case '/magazine':
+        final id = settings.arguments as int;
+        return MaterialPageRoute(
+          builder: (_) => MagazineDetailScreen(magazineId: id),
+        );
+      case '/create-magazine':
+        return MaterialPageRoute(
+            builder: (_) => const CreateMagazineScreen());
+      // Ayarlar — sadece üyeler
+      case '/settings/icon':
+        return MaterialPageRoute(
+            builder: (_) => const AppIconSettingsScreen());
+      case '/edit-profile':
+        return MaterialPageRoute(
+            builder: (_) => const EditProfileScreen());
       default:
         return MaterialPageRoute(builder: (_) => const FeedScreen());
     }

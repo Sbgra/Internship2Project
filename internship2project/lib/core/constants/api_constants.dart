@@ -25,4 +25,30 @@ class ApiConstants {
   static String userArticles(int id) => '$baseUrl/users/$id/articles';
   static const String myProfile = '$baseUrl/users/me/profile';
   static const String updateBio = '$baseUrl/users/me/bio';
+  static const String updateProfileCustomization = '$baseUrl/users/me/profile_customization';
+
+  // Stats — herkes erişebilir
+  static String articleStats(int id) => '$baseUrl/stats/$id';
+  static String articleView(int id) => '$baseUrl/stats/$id/view';
+
+  // Claps — herkes kullanabilir (makale başına 50 limit)
+  static String articleClap(int id) => '$baseUrl/articles/$id/clap';
+  static String articleClaps(int id) => '$baseUrl/articles/$id/claps';
+
+  // Communities — listeleme herkese, katılma/oluşturma üyelere
+  static const String communitiesBase = '$baseUrl/communities';
+  static String communityById(int id) => '$baseUrl/communities/$id';
+  static String communityJoin(int id) => '$baseUrl/communities/$id/join';
+  static String communityLeave(int id) => '$baseUrl/communities/$id/leave';
+
+  // Magazines — oluşturma/düzenleme üyelere, detay herkese
+  static const String magazinesBase = '$baseUrl/magazines';
+  static const String myMagazines = '$baseUrl/magazines/my';
+  static String magazineById(int id) => '$baseUrl/magazines/$id';
+  static String magazineArticles(int id) => '$baseUrl/magazines/$id/articles';
+  static String magazineRemoveArticle(int magId, int artId) =>
+      '$baseUrl/magazines/$magId/articles/$artId';
+
+  // Settings — sadece üyeler
+  static const String mySettings = '$baseUrl/settings/me';
 }

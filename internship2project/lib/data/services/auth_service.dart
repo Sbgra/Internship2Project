@@ -57,6 +57,28 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateBio(String bio) async {
+    if (_token == null) return;
+    final data = await ApiService.patch(
+      ApiConstants.updateBio,
+      {'bio': bio},
+      token: _token,
+    );
+    _currentUser = UserPublicModel.fromJson(data);
+    notifyListeners();
+  }
+
+  Future<void> updateProfileCustomization(String? profilePicture) async {
+    if (_token == null) return;
+    final data = await ApiService.patch(
+      ApiConstants.updateProfileCustomization,
+      {'profile_picture': profilePicture},
+      token: _token,
+    );
+    _currentUser = UserPublicModel.fromJson(data);
+    notifyListeners();
+  }
+
   // ── Private ────────────────────────────────────────────────────
 
   Future<void> _saveSession(Map<String, dynamic> data) async {

@@ -18,25 +18,32 @@ def _build(row) -> dict:
         "content":    d.get("content"),
         "summary":    d.get("summary"),
         "is_public":  bool(d["is_public"]),
+        "share_token":d.get("share_token"),
         "author_id":  d["author_id"],
         "created_at": d["created_at"],
         "updated_at": d.get("updated_at"),
         "author": {
-            "id":         d["user_id"],
-            "username":   d["username"],
-            "bio":        d.get("bio"),
-            "created_at": d["user_created_at"],
+            "id":              d["user_id"],
+            "username":        d["username"],
+            "bio":             d.get("bio"),
+            "profile_picture": d.get("profile_picture"),
+            "profile_color":   d.get("profile_color"),
+            "emotes":          d.get("emotes"),
+            "created_at":      d["user_created_at"],
         },
     }
 
 
 _SELECT = """
     SELECT
-        a.id, a.title, a.content, a.summary, a.is_public,
+        a.id, a.title, a.content, a.summary, a.is_public, a.share_token,
         a.author_id, a.created_at, a.updated_at,
         u.id   AS user_id,
         u.username,
         u.bio,
+        u.profile_picture,
+        u.profile_color,
+        u.emotes,
         u.created_at AS user_created_at
     FROM articles a
     JOIN users u ON u.id = a.author_id
@@ -56,6 +63,13 @@ def get_public_articles(conn: sqlite3.Connection, skip: int = 0, limit: int = 20
 def get_random_feed(conn: sqlite3.Connection, limit: int = 10) -> List[dict]:
     all_public = get_public_articles(conn, limit=1000)
     return random.sample(all_public, min(limit, len(all_public)))
+
+
+def get_personalized_feed(conn: sqlite3.Connection, user_id: int, limit: int = 10) -> List[dict]:
+    # Basit bir kişiselleştirilmiş akış: Rastgele herkese açık makaleler, ama yazarın kendi makaleleri hariç
+    sql = _SELECT + "WHERE a.is_public = 1 AND a.author_id != ? ORDER BY RANDOM() LIMIT ?"
+    rows = conn.execute(sql, (user_id, limit)).fetchall()
+    return [_build(r) for r in rows]
 
 
 def get_article_by_id(conn: sqlite3.Connection, article_id: int) -> Optional[dict]:

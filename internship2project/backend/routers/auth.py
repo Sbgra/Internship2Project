@@ -16,7 +16,10 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 def register(data: UserCreate, conn: sqlite3.Connection = Depends(get_db)):
     if get_user_by_email(conn, data.email) or get_user_by_username(conn, data.username):
         raise HTTPException(status_code=400, detail="Bu e-posta veya kullanıcı adı zaten kullanımda")
-    user = create_user(conn, data.username, data.email, data.password)
+    try:
+        user = create_user(conn, data.username, data.email, data.password)
+    except sqlite3.IntegrityError:
+        raise HTTPException(status_code=400, detail="Bu e-posta veya kullanıcı adı zaten kullanımda")
     token = create_access_token({"sub": str(user["id"])})
     return TokenResponse(access_token=token, user=UserPublic(**user))
 

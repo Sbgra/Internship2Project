@@ -41,6 +41,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
       }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Bağlantı hatası: $e')),
+        );
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }

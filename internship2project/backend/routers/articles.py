@@ -1,4 +1,5 @@
 import sqlite3
+import secrets
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -27,6 +28,7 @@ def my_articles(
 @router.get("/{article_id}", response_model=ArticleDetail)
 def get_article(
     article_id: int,
+    share_token: Optional[str] = None,
     conn: sqlite3.Connection = Depends(get_db),
     current_user: Optional[dict] = Depends(get_optional_user),
 ):
@@ -34,7 +36,9 @@ def get_article(
     if not article:
         raise HTTPException(status_code=404, detail="Makale bulunamadı")
     if not article["is_public"]:
-        if not current_user or current_user["id"] != article["author_id"]:
+        is_author = current_user and current_user["id"] == article["author_id"]
+        valid_token = share_token and article.get("share_token") == share_token
+        if not (is_author or valid_token):
             raise HTTPException(status_code=403, detail="Erişim yetkiniz yok")
     return article
 
@@ -73,3 +77,50 @@ def delete_article(
 ):
     if not article_service.delete_article(conn, article_id, current_user["id"]):
         raise HTTPException(status_code=404, detail="Makale bulunamadı veya yetkiniz yok")
+
+@router.post("/{article_id}/share")
+def generate_share_token(
+    article_id: int,
+    current_user: dict = Depends(get_current_user),
+    conn: sqlite3.Connection = Depends(get_db),
+):
+    """Makale için paylaşım bağlantısı token'ı üretir (Sadece yazar)."""
+    article = article_service.get_article_by_id(conn, article_id)
+    if not article or article["author_id"] != current_user["id"]:
+        raise HTTPException(status_code=404, detail="Makale bulunamadı veya yetkiniz yok")
+    
+    token = secrets.token_urlsafe(16)
+    conn.execute("UPDATE articles SET share_token = ? WHERE id = ?", (token, article_id))
+    conn.commit()
+    return {"share_token": token}
+
+
+@router.post("/{article_id}/offline")
+def save_offline(
+    article_id: int,
+    current_user: dict = Depends(get_current_user),
+    conn: sqlite3.Connection = Depends(get_db),
+):
+    """Makaleyi çevrimdışı okumak için kaydeder (Sadece üyeler)."""
+    article = article_service.get_article_by_id(conn, article_id)
+    if not article:
+        raise HTTPException(status_code=404, detail="Makale bulunamadı")
+    try:
+        conn.execute("INSERT INTO saved_articles (user_id, article_id) VALUES (?, ?)", (current_user["id"], article_id))
+        conn.commit()
+    except sqlite3.IntegrityError:
+        pass # Zaten kaydedilmiş
+    return {"status": "ok", "message": "Makale çevrimdışı okuma için kaydedildi"}
+
+
+@router.get("/{article_id}/audio")
+def get_audio_stream(
+    article_id: int,
+    current_user: dict = Depends(get_current_user),
+    conn: sqlite3.Connection = Depends(get_db),
+):
+    """Makaleyi sesli dinleme özelliği (Sadece üyeler)."""
+    article = article_service.get_article_by_id(conn, article_id)
+    if not article:
+        raise HTTPException(status_code=404, detail="Makale bulunamadı")
+    return {"status": "ok", "audio_url": f"https://mock-audio-service.com/articles/{article_id}/listen"}
