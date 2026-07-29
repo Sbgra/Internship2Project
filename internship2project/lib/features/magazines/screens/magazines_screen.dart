@@ -42,8 +42,9 @@ class _MagazinesScreenState extends State<MagazinesScreen> {
       appBar: AppBar(title: const Text('Dergilerim')),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final result =
-              await Navigator.of(context).pushNamed('/create-magazine');
+          final result = await Navigator.of(
+            context,
+          ).pushNamed('/create-magazine');
           if (result == true) _load();
         },
         child: const Icon(Icons.add),
@@ -57,9 +58,11 @@ class _MagazinesScreenState extends State<MagazinesScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.menu_book_outlined,
-                              size: 56,
-                              color: AppTheme.textSecondary.withOpacity(0.5)),
+                          Icon(
+                            Icons.menu_book_outlined,
+                            size: 56,
+                            color: AppTheme.textSecondary.withOpacity(0.5),
+                          ),
                           const SizedBox(height: 16),
                           const Text(
                             'Henüz dergi oluşturmadınız',
@@ -82,11 +85,24 @@ class _MagazinesScreenState extends State<MagazinesScreen> {
                       itemBuilder: (context, index) {
                         final m = _magazines[index];
                         return ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: AppTheme.primary.withOpacity(0.2),
-                            child: const Icon(Icons.menu_book,
-                                color: AppTheme.primary, size: 20),
-                          ),
+                          leading: m.image != null && m.image!.isNotEmpty
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    m.image!,
+                                    width: 40,
+                                    height: 40,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) => CircleAvatar(
+                                      backgroundColor: AppTheme.primary.withValues(alpha: 0.2),
+                                      child: const Icon(Icons.menu_book, color: AppTheme.primary, size: 20),
+                                    ),
+                                  ),
+                                )
+                              : CircleAvatar(
+                                  backgroundColor: AppTheme.primary.withValues(alpha: 0.2),
+                                  child: const Icon(Icons.menu_book, color: AppTheme.primary, size: 20),
+                                ),
                           title: Text(
                             m.title,
                             style: const TextStyle(
@@ -109,10 +125,9 @@ class _MagazinesScreenState extends State<MagazinesScreen> {
                             color: AppTheme.textSecondary,
                           ),
                           onTap: () async {
-                            await Navigator.of(context).pushNamed(
-                              '/magazine',
-                              arguments: m.id,
-                            );
+                            await Navigator.of(
+                              context,
+                            ).pushNamed('/magazine', arguments: m.id);
                             _load();
                           },
                         );

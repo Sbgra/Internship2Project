@@ -5,6 +5,7 @@ class ArticleModel {
   final int id;
   final String title;
   final String? summary;
+  final String? coverImage;
   final bool isPublic;
   final int authorId;
   final UserPublicModel author;
@@ -14,6 +15,7 @@ class ArticleModel {
     required this.id,
     required this.title,
     this.summary,
+    this.coverImage,
     required this.isPublic,
     required this.authorId,
     required this.author,
@@ -25,6 +27,7 @@ class ArticleModel {
       id: json['id'] as int,
       title: json['title'] as String,
       summary: json['summary'] as String?,
+      coverImage: json['cover_image'] as String?,
       isPublic: json['is_public'] as bool,
       authorId: json['author_id'] as int,
       author: UserPublicModel.fromJson(json['author'] as Map<String, dynamic>),
@@ -47,17 +50,20 @@ class ArticleModel {
 class ArticleDetailModel extends ArticleModel {
   final String content;
   final DateTime? updatedAt;
+  final List<String>? availableTranslations;
 
   const ArticleDetailModel({
     required super.id,
     required super.title,
     super.summary,
+    super.coverImage,
     required super.isPublic,
     required super.authorId,
     required super.author,
     required super.createdAt,
     required this.content,
     this.updatedAt,
+    this.availableTranslations,
   });
 
   factory ArticleDetailModel.fromJson(Map<String, dynamic> json) {
@@ -65,6 +71,7 @@ class ArticleDetailModel extends ArticleModel {
       id: json['id'] as int,
       title: json['title'] as String,
       summary: json['summary'] as String?,
+      coverImage: json['cover_image'] as String?,
       isPublic: json['is_public'] as bool,
       authorId: json['author_id'] as int,
       author: UserPublicModel.fromJson(json['author'] as Map<String, dynamic>),
@@ -72,6 +79,9 @@ class ArticleDetailModel extends ArticleModel {
       content: json['content'] as String,
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
+          : null,
+      availableTranslations: json['available_translations'] != null
+          ? List<String>.from(json['available_translations'])
           : null,
     );
   }

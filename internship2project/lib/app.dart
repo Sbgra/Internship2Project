@@ -31,7 +31,7 @@ class App extends StatelessWidget {
       child: MaterialApp(
         title: 'MyPlatform',
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.darkTheme,
+        theme: AppTheme.lightTheme,
         home: const _AppGate(),
         onGenerateRoute: _onGenerateRoute,
       ),

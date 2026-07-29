@@ -16,9 +16,12 @@ class AuthService extends ChangeNotifier {
   bool get isLoggedIn => _token != null;
   bool get initialized => _initialized;
 
-  /// Uygulama başlangıcında kaydedilmiş token varsa yükler.
+  /// Uygulama başlangıcında kaydedilmiş token varsa yükler. (Otomatik giriş isteğe bağlı olarak iptal edildi)
   Future<void> init() async {
-    _token = await TokenStorage.load();
+    // Otomatik giriş kapatıldı: Uygulama her açıldığında token silinsin
+    await TokenStorage.clear();
+    _token = null;
+    
     if (_token != null) {
       try {
         final data = await ApiService.get(

@@ -9,13 +9,24 @@ class ArticleService {
 
   // ── Feed ───────────────────────────────────────────────────────
 
-  static Future<List<ArticleModel>> getRandomFeed({int limit = 10}) async {
-    final list = await ApiService.getList(
-      '${ApiConstants.randomFeed}?limit=$limit',
-    );
+  static Future<List<ArticleModel>> getRandomFeed({int limit = 10, List<String>? categories}) async {
+    String url = '${ApiConstants.randomFeed}?limit=$limit';
+    if (categories != null && categories.isNotEmpty) {
+      for (var c in categories) {
+        url += '&categories=${Uri.encodeComponent(c)}';
+      }
+    }
+    final list = await ApiService.getList(url);
     return list
         .map((e) => ArticleModel.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  // ── Categories ──────────────────────────────────────────────────
+
+  static Future<List<String>> getCategories() async {
+    final list = await ApiService.getList(ApiConstants.categories);
+    return list.map((e) => e.toString()).toList();
   }
 
   // ── Public Articles ────────────────────────────────────────────
@@ -23,10 +34,15 @@ class ArticleService {
   static Future<List<ArticleModel>> getPublicArticles({
     int skip = 0,
     int limit = 20,
+    List<String>? categories,
   }) async {
-    final list = await ApiService.getList(
-      '${ApiConstants.publicArticles}?skip=$skip&limit=$limit',
-    );
+    String url = '${ApiConstants.publicArticles}?skip=$skip&limit=$limit';
+    if (categories != null && categories.isNotEmpty) {
+      for (var c in categories) {
+        url += '&categories=${Uri.encodeComponent(c)}';
+      }
+    }
+    final list = await ApiService.getList(url);
     return list
         .map((e) => ArticleModel.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -35,9 +51,14 @@ class ArticleService {
   static Future<ArticleDetailModel> getArticleById(
     int id, {
     String? token,
+    String? lang,
   }) async {
+    String url = ApiConstants.articleById(id);
+    if (lang != null && lang.isNotEmpty) {
+      url += '?lang=${Uri.encodeComponent(lang)}';
+    }
     final data = await ApiService.get(
-      ApiConstants.articleById(id),
+      url,
       token: token,
     );
     return ArticleDetailModel.fromJson(data);
@@ -60,7 +81,10 @@ class ArticleService {
     required String title,
     required String content,
     String? summary,
+    String? coverImage,
     bool isPublic = true,
+    List<String>? categories,
+    List<String>? targetLanguages,
   }) async {
     final data = await ApiService.post(
       ApiConstants.articlesBase,
@@ -68,7 +92,10 @@ class ArticleService {
         'title': title,
         'content': content,
         if (summary != null) 'summary': summary,
+        if (coverImage != null) 'cover_image': coverImage,
         'is_public': isPublic,
+        if (categories != null) 'categories': categories,
+        if (targetLanguages != null) 'target_languages': targetLanguages,
       },
       token: token,
     );
@@ -81,12 +108,14 @@ class ArticleService {
     String? title,
     String? content,
     String? summary,
+    String? coverImage,
     bool? isPublic,
   }) async {
     final body = <String, dynamic>{
       if (title != null) 'title': title,
       if (content != null) 'content': content,
       if (summary != null) 'summary': summary,
+      if (coverImage != null) 'cover_image': coverImage,
       if (isPublic != null) 'is_public': isPublic,
     };
     final data = await ApiService.put(

@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\internship2project\internship2project\backend\api\articles\router.py", line 306, in get_audio_stream
+    if response.candidates and response.candidates[0].content.parts:
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'parts'

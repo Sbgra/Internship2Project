@@ -33,9 +33,10 @@ class _ClapButtonState extends State<ClapButton>
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
-    _scaleAnim = Tween<double>(begin: 1.0, end: 1.3).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
+    _scaleAnim = Tween<double>(
+      begin: 1.0,
+      end: 1.3,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
   }
 
   @override
@@ -103,18 +104,12 @@ class _ClapButtonState extends State<ClapButton>
         if (widget.remainingClaps > 0)
           Text(
             '${widget.remainingClaps} hak kaldı',
-            style: const TextStyle(
-              color: AppTheme.textSecondary,
-              fontSize: 10,
-            ),
+            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 10),
           )
         else
           const Text(
             'Limit doldu',
-            style: TextStyle(
-              color: AppTheme.textSecondary,
-              fontSize: 10,
-            ),
+            style: TextStyle(color: AppTheme.textSecondary, fontSize: 10),
           ),
       ],
     );

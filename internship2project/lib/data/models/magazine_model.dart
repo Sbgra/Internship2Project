@@ -6,6 +6,7 @@ class MagazineModel {
   final int id;
   final String title;
   final String? description;
+  final String? image;
   final int ownerId;
   final int articleCount;
   final String createdAt;
@@ -14,6 +15,7 @@ class MagazineModel {
     required this.id,
     required this.title,
     this.description,
+    this.image,
     required this.ownerId,
     required this.articleCount,
     required this.createdAt,
@@ -24,6 +26,7 @@ class MagazineModel {
       id: json['id'] as int,
       title: json['title'] as String,
       description: json['description'] as String?,
+      image: json['image'] as String?,
       ownerId: json['owner_id'] as int,
       articleCount: json['article_count'] as int,
       createdAt: json['created_at'] as String,
@@ -38,6 +41,7 @@ class MagazineDetailModel extends MagazineModel {
     required super.id,
     required super.title,
     super.description,
+    super.image,
     required super.ownerId,
     required super.articleCount,
     required super.createdAt,
@@ -49,6 +53,7 @@ class MagazineDetailModel extends MagazineModel {
       id: json['id'] as int,
       title: json['title'] as String,
       description: json['description'] as String?,
+      image: json['image'] as String?,
       ownerId: json['owner_id'] as int,
       articleCount: json['article_count'] as int,
       createdAt: json['created_at'] as String,

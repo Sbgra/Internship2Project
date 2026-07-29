@@ -44,8 +44,9 @@ class _CommunitiesScreenState extends State<CommunitiesScreen> {
       floatingActionButton: auth.isLoggedIn
           ? FloatingActionButton(
               onPressed: () async {
-                final result = await Navigator.of(context)
-                    .pushNamed('/create-community');
+                final result = await Navigator.of(
+                  context,
+                ).pushNamed('/create-community');
                 if (result == true) _load();
               },
               child: const Icon(Icons.add),
@@ -60,9 +61,11 @@ class _CommunitiesScreenState extends State<CommunitiesScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.groups_outlined,
-                              size: 56,
-                              color: AppTheme.textSecondary.withOpacity(0.5)),
+                          Icon(
+                            Icons.groups_outlined,
+                            size: 56,
+                            color: AppTheme.textSecondary.withOpacity(0.5),
+                          ),
                           const SizedBox(height: 16),
                           const Text(
                             'Henüz topluluk yok',
@@ -78,10 +81,18 @@ class _CommunitiesScreenState extends State<CommunitiesScreen> {
                         return ListTile(
                           leading: CircleAvatar(
                             backgroundColor: AppTheme.primary.withOpacity(0.2),
-                            child: Text(
-                              c.name[0].toUpperCase(),
-                              style: const TextStyle(color: AppTheme.primary),
-                            ),
+                            backgroundImage:
+                                (c.image != null && c.image!.isNotEmpty)
+                                ? NetworkImage(c.image!)
+                                : null,
+                            child: (c.image == null || c.image!.isEmpty)
+                                ? Text(
+                                    c.name[0].toUpperCase(),
+                                    style: const TextStyle(
+                                      color: AppTheme.primary,
+                                    ),
+                                  )
+                                : null,
                           ),
                           title: Text(
                             c.name,
@@ -105,10 +116,9 @@ class _CommunitiesScreenState extends State<CommunitiesScreen> {
                             color: AppTheme.textSecondary,
                           ),
                           onTap: () async {
-                            await Navigator.of(context).pushNamed(
-                              '/community',
-                              arguments: c.id,
-                            );
+                            await Navigator.of(
+                              context,
+                            ).pushNamed('/community', arguments: c.id);
                             _load();
                           },
                         );

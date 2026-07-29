@@ -36,12 +36,14 @@ class CommunityService {
     required String token,
     required String name,
     String? description,
+    String? image,
   }) async {
     final data = await ApiService.post(
       ApiConstants.communitiesBase,
       {
         'name': name,
         if (description != null) 'description': description,
+        if (image != null && image.isNotEmpty) 'image': image,
       },
       token: token,
     );
@@ -61,6 +63,43 @@ class CommunityService {
   static Future<void> leaveCommunity(int communityId, String token) async {
     await ApiService.delete(
       ApiConstants.communityLeave(communityId),
+      token: token,
+    );
+  }
+
+  static Future<List<dynamic>> getForumTopics(int communityId) async {
+    return await ApiService.getList(ApiConstants.communityForumTopics(communityId));
+  }
+
+  static Future<void> createForumTopic(
+    int communityId,
+    String token,
+    String title,
+    String content,
+  ) async {
+    await ApiService.post(
+      ApiConstants.communityForumTopics(communityId),
+      {'title': title, 'content': content},
+      token: token,
+    );
+  }
+
+  static Future<Map<String, dynamic>> getTopicDetails(int topicId) async {
+    return await ApiService.get(ApiConstants.communityForumTopicDetails(topicId));
+  }
+
+  static Future<void> createTopicPost(
+    int topicId,
+    String token,
+    String content, {
+    int? parentId,
+  }) async {
+    final body = <String, dynamic>{'content': content};
+    if (parentId != null) body['parent_id'] = parentId;
+    
+    await ApiService.post(
+      ApiConstants.communityForumTopicPosts(topicId),
+      body,
       token: token,
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/article_model.dart';
@@ -10,9 +11,11 @@ import '../../../data/services/stats_service.dart';
 import '../../../data/services/offline_service.dart';
 import '../../../data/services/magazine_service.dart';
 import '../../../shared/widgets/loading_indicator.dart';
+import '../../../core/constants/api_constants.dart';
 import '../widgets/stats_widget.dart';
 import '../widgets/clap_button.dart';
 import '../widgets/tts_player_widget.dart';
+import '../../communities/widgets/comment_tree_widget.dart';
 
 class ArticleDetailScreen extends StatefulWidget {
   final int articleId;
@@ -30,6 +33,12 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
   bool _clapLoading = false;
   bool _isSaved = false;
   String? _error;
+  List<CommentModel> _comments = [];
+  bool _commentsLoading = false;
+  final TextEditingController _commentCtrl = TextEditingController();
+  
+  String? _selectedLang;
+  List<String> _availableLangs = [];
 
   @override
   void initState() {
@@ -40,14 +49,31 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
   Future<void> _load() async {
     final token = context.read<AuthService>().token;
     try {
-      final a = await ArticleService.getArticleById(widget.articleId, token: token);
-      if (mounted) setState(() => _article = a);
+      final a = await ArticleService.getArticleById(
+        widget.articleId,
+        token: token,
+        lang: _selectedLang,
+      );
+      if (mounted) {
+        setState(() {
+          _article = a;
+          // İlk yüklemede dilleri ayarla (artık tüm diller açık, backend anında çeviriyor)
+          if (_availableLangs.isEmpty) {
+            _availableLangs = [
+              'Orijinal', 'İngilizce', 'Almanca', 'Fransızca', 
+              'İspanyolca', 'İtalyanca', 'Rusça', 'Arapça', 'Japonca'
+            ];
+          }
+        });
+      }
 
       // İstatistikleri yükle (herkes görebilir)
       _loadStats();
 
       // Alkış bilgisi yükle
       _loadClaps();
+      
+      _loadComments();
 
       // Görüntülenme kaydet (başarısız olursa sessiz geç)
       try {
@@ -96,6 +122,51 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
       }
     } catch (_) {
       // Kritik değil, sessiz geç
+    }
+  }
+
+  Future<void> _loadComments() async {
+    setState(() => _commentsLoading = true);
+    try {
+      final res = await ApiService.getList('${ApiConstants.baseUrl}/comments/articles/${widget.articleId}');
+      if (mounted) {
+        setState(() {
+          _comments = res.map((c) => CommentModel(
+            id: c['id'],
+            authorName: c['username'] ?? 'Kullanıcı',
+            profilePicture: c['profile_picture'],
+            content: c['content'] ?? '',
+            createdAt: c['created_at'] ?? '',
+            replies: [],
+          )).toList();
+        });
+      }
+    } catch (_) {
+      // sessiz geç
+    } finally {
+      if (mounted) setState(() => _commentsLoading = false);
+    }
+  }
+
+  Future<void> _submitComment(int? parentId) async {
+    final token = context.read<AuthService>().token;
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Yorum yapmak için giriş yapmalısınız')));
+      return;
+    }
+    final text = _commentCtrl.text.trim();
+    if (text.isEmpty) return;
+    
+    try {
+      await ApiService.post(
+        '${ApiConstants.baseUrl}/comments/articles/${widget.articleId}',
+        {'content': text},
+        token: token,
+      );
+      _commentCtrl.clear();
+      _loadComments();
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Yorum eklenemedi')));
     }
   }
 
@@ -176,10 +247,16 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
                 child: Center(child: CircularProgressIndicator()),
               );
             }
-            if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+            if (snapshot.hasError ||
+                !snapshot.hasData ||
+                snapshot.data!.isEmpty) {
               return const SizedBox(
                 height: 200,
-                child: Center(child: Text('Eklenecek dergi bulunamadı. Önce bir dergi oluşturun.')),
+                child: Center(
+                  child: Text(
+                    'Eklenecek dergi bulunamadı. Önce bir dergi oluşturun.',
+                  ),
+                ),
               );
             }
 
@@ -198,15 +275,21 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
                         magazineId: mag.id,
                         articleId: widget.articleId,
                       );
-                      if (mounted) {
+                      if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('${mag.title} dergisine eklendi')),
+                          SnackBar(
+                            content: Text('${mag.title} dergisine eklendi'),
+                          ),
                         );
                       }
                     } catch (e) {
-                      if (mounted) {
+                      if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Dergiye eklenirken hata oluştu (belki zaten eklidir)')),
+                          const SnackBar(
+                            content: Text(
+                              'Dergiye eklenirken hata oluştu (belki zaten eklidir)',
+                            ),
+                          ),
                         );
                       }
                     }
@@ -228,11 +311,13 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
         content: const Text('Bu işlem geri alınamaz.'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('İptal')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('İptal'),
+          ),
           TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Sil', style: TextStyle(color: AppTheme.error))),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Sil', style: TextStyle(color: AppTheme.error)),
+          ),
         ],
       ),
     );
@@ -245,8 +330,9 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
       if (mounted) Navigator.of(context).pop();
     } on ApiException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
       }
     }
   }
@@ -277,6 +363,28 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
           style: const TextStyle(color: AppTheme.primary, fontSize: 14),
         ),
         actions: [
+          if (_availableLangs.length > 1)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _selectedLang ?? 'Orijinal',
+                  dropdownColor: AppTheme.surface,
+                  icon: const Icon(Icons.language, color: AppTheme.primary),
+                  style: const TextStyle(color: AppTheme.textPrimary, fontSize: 12),
+                  items: _availableLangs.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
+                  onChanged: (v) {
+                    if (v != null && v != (_selectedLang ?? 'Orijinal')) {
+                      setState(() {
+                        _selectedLang = v == 'Orijinal' ? null : v;
+                        _loading = true;
+                      });
+                      _load();
+                    }
+                  },
+                ),
+              ),
+            ),
           // Dergiye ekle — sadece üyeler
           if (isLoggedIn)
             IconButton(
@@ -307,6 +415,21 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (article.coverImage != null &&
+                article.coverImage!.isNotEmpty) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  article.coverImage!,
+                  width: double.infinity,
+                  height: 200,
+                  cacheHeight: 600,
+                  fit: BoxFit.cover,
+                  errorBuilder: (ctx, err, stack) => const SizedBox(),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             // Başlık
             Text(
               article.title,
@@ -336,7 +459,11 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
 
             // Sesli dinleme — sadece üyeler
             if (isLoggedIn) ...[
-              TtsPlayerWidget(text: article.content),
+              TtsPlayerWidget(
+                articleId: article.id, 
+                text: article.content,
+                lang: _selectedLang ?? 'tr',
+              ),
               const SizedBox(height: 16),
             ],
 
@@ -344,12 +471,18 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
             const SizedBox(height: 20),
 
             // İçerik
-            SelectableText(
-              article.content,
-              style: const TextStyle(
-                color: AppTheme.textPrimary,
-                fontSize: 16,
-                height: 1.7,
+            SelectionArea(
+              child: Html(
+                data: article.content,
+                style: {
+                  "body": Style(
+                    fontSize: FontSize(16.0),
+                    color: AppTheme.textPrimary,
+                    lineHeight: LineHeight(1.7),
+                    padding: HtmlPaddings.zero,
+                    margin: Margins.zero,
+                  ),
+                },
               ),
             ),
             const SizedBox(height: 32),
@@ -368,17 +501,27 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
 
             // Yazar kutusu
             GestureDetector(
-              onTap: () => Navigator.of(context)
-                  .pushNamed('/profile', arguments: article.authorId),
+              onTap: () => Navigator.of(
+                context,
+              ).pushNamed('/profile', arguments: article.authorId),
               child: Row(
                 children: [
                   CircleAvatar(
                     radius: 18,
                     backgroundColor: AppTheme.primary.withOpacity(0.2),
-                    child: Text(
-                      article.author.username[0].toUpperCase(),
-                      style: const TextStyle(color: AppTheme.primary),
-                    ),
+                    backgroundImage:
+                        article.author.profilePicture != null &&
+                            article.author.profilePicture!.isNotEmpty
+                        ? NetworkImage(article.author.profilePicture!)
+                        : null,
+                    child:
+                        article.author.profilePicture == null ||
+                            article.author.profilePicture!.isEmpty
+                        ? Text(
+                            article.author.username[0].toUpperCase(),
+                            style: const TextStyle(color: AppTheme.primary),
+                          )
+                        : null,
                   ),
                   const SizedBox(width: 10),
                   Text(
@@ -391,6 +534,45 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
                 ],
               ),
             ),
+            const SizedBox(height: 40),
+            
+            const Divider(),
+            const SizedBox(height: 16),
+            const Text('Yorumlar', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+            const SizedBox(height: 16),
+            if (isLoggedIn)
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _commentCtrl,
+                      decoration: InputDecoration(
+                        hintText: 'Yorumunuzu yazın...',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      ),
+                      maxLines: null,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    onPressed: () => _submitComment(null),
+                    icon: const Icon(Icons.send, color: AppTheme.primary),
+                  ),
+                ],
+              )
+            else
+              const Text('Yorum yapmak için giriş yapmalısınız.', style: TextStyle(color: AppTheme.textSecondary)),
+            const SizedBox(height: 24),
+            _commentsLoading
+                ? const Center(child: CircularProgressIndicator())
+                : CommentTreeWidget(
+                    comments: _comments,
+                    onReply: (parentId) {
+                      // Basit yorum özelliği için şimdilik sadece alana odaklar
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Yanıtlamak için yukarıdaki alanı kullanabilirsiniz')));
+                    },
+                  ),
             const SizedBox(height: 40),
           ],
         ),

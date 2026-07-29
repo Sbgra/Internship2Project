@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../data/services/community_service.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/api_service.dart';
+import '../../../core/constants/api_constants.dart';
 
 /// Topluluk oluşturma ekranı — sadece üyeler.
 class CreateCommunityScreen extends StatefulWidget {
@@ -17,6 +20,8 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
   final _nameCtrl = TextEditingController();
   final _descCtrl = TextEditingController();
   bool _loading = false;
+  File? _selectedImage;
+  String? _uploadedImageUrl;
 
   @override
   void dispose() {
@@ -25,16 +30,36 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      setState(() => _selectedImage = File(picked.path));
+    }
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
+    
     try {
+      final token = context.read<AuthService>().token!;
+      
+      if (_selectedImage != null) {
+        _uploadedImageUrl = await ApiService.uploadImage(
+          ApiConstants.mediaUploadImage,
+          _selectedImage!,
+          token: token,
+        );
+      }
+      
       await CommunityService.createCommunity(
-        token: context.read<AuthService>().token!,
+        token: token,
         name: _nameCtrl.text.trim(),
         description: _descCtrl.text.trim().isNotEmpty
             ? _descCtrl.text.trim()
             : null,
+        image: _uploadedImageUrl,
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -93,6 +118,16 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
                     const InputDecoration(labelText: 'Açıklama (opsiyonel)'),
                 maxLines: 3,
               ),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: _pickImage,
+                icon: const Icon(Icons.image),
+                label: const Text('Kapak Resmi Seç (opsiyonel)'),
+              ),
+              if (_selectedImage != null) ...[
+                const SizedBox(height: 8),
+                Text('Seçilen dosya: ${_selectedImage!.path.split('/').last}'),
+              ],
             ],
           ),
         ),

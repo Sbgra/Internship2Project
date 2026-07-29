@@ -4,6 +4,7 @@ class CommunityListItemModel {
   final int id;
   final String name;
   final String? description;
+  final String? image;
   final int memberCount;
   final String createdAt;
 
@@ -11,6 +12,7 @@ class CommunityListItemModel {
     required this.id,
     required this.name,
     this.description,
+    this.image,
     required this.memberCount,
     required this.createdAt,
   });
@@ -20,6 +22,7 @@ class CommunityListItemModel {
       id: json['id'] as int,
       name: json['name'] as String,
       description: json['description'] as String?,
+      image: json['image'] as String?,
       memberCount: json['member_count'] as int,
       createdAt: json['created_at'] as String,
     );
@@ -30,6 +33,7 @@ class CommunityDetailModel {
   final int id;
   final String name;
   final String? description;
+  final String? image;
   final int memberCount;
   final int createdBy;
   final String createdAt;
@@ -39,6 +43,7 @@ class CommunityDetailModel {
     required this.id,
     required this.name,
     this.description,
+    this.image,
     required this.memberCount,
     required this.createdBy,
     required this.createdAt,
@@ -50,6 +55,7 @@ class CommunityDetailModel {
       id: json['id'] as int,
       name: json['name'] as String,
       description: json['description'] as String?,
+      image: json['image'] as String?,
       memberCount: json['member_count'] as int,
       createdBy: json['created_by'] as int,
       createdAt: json['created_at'] as String,

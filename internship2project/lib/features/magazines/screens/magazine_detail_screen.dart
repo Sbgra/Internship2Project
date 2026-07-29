@@ -4,6 +4,10 @@ import '../../../data/models/magazine_model.dart';
 import '../../../data/services/magazine_service.dart';
 import '../../../data/services/api_service.dart';
 import '../../../shared/widgets/loading_indicator.dart';
+import 'package:provider/provider.dart';
+import '../../../data/services/auth_service.dart';
+import '../../../core/constants/api_constants.dart';
+import '../../communities/widgets/comment_tree_widget.dart';
 
 /// Dergi detay ekranı — içindeki makaleleri listeler.
 class MagazineDetailScreen extends StatefulWidget {
@@ -18,6 +22,9 @@ class _MagazineDetailScreenState extends State<MagazineDetailScreen> {
   MagazineDetailModel? _magazine;
   bool _loading = true;
   String? _error;
+  List<CommentModel> _comments = [];
+  bool _commentsLoading = false;
+  final TextEditingController _commentCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -33,10 +40,56 @@ class _MagazineDetailScreenState extends State<MagazineDetailScreen> {
     try {
       final data = await MagazineService.getMagazineDetail(widget.magazineId);
       if (mounted) setState(() => _magazine = data);
+      _loadComments();
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
     } finally {
       if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _loadComments() async {
+    setState(() => _commentsLoading = true);
+    try {
+      final res = await ApiService.getList('${ApiConstants.baseUrl}/comments/magazines/${widget.magazineId}');
+      if (mounted) {
+        setState(() {
+          _comments = res.map((c) => CommentModel(
+            id: c['id'],
+            authorName: c['username'] ?? 'Kullanıcı',
+            profilePicture: c['profile_picture'],
+            content: c['content'] ?? '',
+            createdAt: c['created_at'] ?? '',
+            replies: [],
+          )).toList();
+        });
+      }
+    } catch (_) {
+      // sessiz geç
+    } finally {
+      if (mounted) setState(() => _commentsLoading = false);
+    }
+  }
+
+  Future<void> _submitComment(int? parentId) async {
+    final token = context.read<AuthService>().token;
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Yorum yapmak için giriş yapmalısınız')));
+      return;
+    }
+    final text = _commentCtrl.text.trim();
+    if (text.isEmpty) return;
+    
+    try {
+      await ApiService.post(
+        '${ApiConstants.baseUrl}/comments/magazines/${widget.magazineId}',
+        {'content': text},
+        token: token,
+      );
+      _commentCtrl.clear();
+      _loadComments();
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Yorum eklenemedi')));
     }
   }
 
@@ -133,6 +186,47 @@ class _MagazineDetailScreenState extends State<MagazineDetailScreen> {
                                     .pushNamed('/article', arguments: a.id),
                               ),
                             ),
+                          const Divider(),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                            child: Text('Yorumlar', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: context.watch<AuthService>().isLoggedIn
+                                ? Row(
+                                    children: [
+                                      Expanded(
+                                        child: TextField(
+                                          controller: _commentCtrl,
+                                          decoration: InputDecoration(
+                                            hintText: 'Yorumunuzu yazın...',
+                                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                          ),
+                                          maxLines: null,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      IconButton(
+                                        onPressed: () => _submitComment(null),
+                                        icon: const Icon(Icons.send, color: AppTheme.primary),
+                                      ),
+                                    ],
+                                  )
+                                : const Text('Yorum yapmak için giriş yapmalısınız.', style: TextStyle(color: AppTheme.textSecondary)),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: _commentsLoading
+                                ? const Center(child: CircularProgressIndicator())
+                                : CommentTreeWidget(
+                                    comments: _comments,
+                                    onReply: (parentId) {
+                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Yanıtlamak için yukarıdaki alanı kullanabilirsiniz')));
+                                    },
+                                  ),
+                          ),
                         ],
                       ),
                     ),

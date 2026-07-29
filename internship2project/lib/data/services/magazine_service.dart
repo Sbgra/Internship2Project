@@ -28,12 +28,14 @@ class MagazineService {
     required String token,
     required String title,
     String? description,
+    String? image,
   }) async {
     final data = await ApiService.post(
       ApiConstants.magazinesBase,
       {
         'title': title,
         if (description != null) 'description': description,
+        if (image != null) 'image': image,
       },
       token: token,
     );

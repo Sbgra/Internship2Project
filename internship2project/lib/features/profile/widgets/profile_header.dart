@@ -19,14 +19,23 @@ class ProfileHeader extends StatelessWidget {
               CircleAvatar(
                 radius: 30,
                 backgroundColor: AppTheme.primary.withOpacity(0.2),
-                child: Text(
-                  profile.initials,
-                  style: const TextStyle(
-                    color: AppTheme.primary,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                backgroundImage:
+                    profile.profilePicture != null &&
+                        profile.profilePicture!.isNotEmpty
+                    ? NetworkImage(profile.profilePicture!)
+                    : null,
+                child:
+                    profile.profilePicture == null ||
+                        profile.profilePicture!.isEmpty
+                    ? Text(
+                        profile.initials,
+                        style: const TextStyle(
+                          color: AppTheme.primary,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : null,
               ),
               const SizedBox(width: 16),
               Expanded(

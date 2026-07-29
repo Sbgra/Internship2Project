@@ -16,25 +16,17 @@ class ApiService {
     };
   }
 
-  static Future<Map<String, dynamic>> get(
-    String url, {
-    String? token,
-  }) async {
-    final response = await _safeRequest(() => _client.get(
-      Uri.parse(url),
-      headers: _headers(token: token),
-    ));
+  static Future<Map<String, dynamic>> get(String url, {String? token}) async {
+    final response = await _safeRequest(
+      () => _client.get(Uri.parse(url), headers: _headers(token: token)),
+    );
     return _handleResponse(response);
   }
 
-  static Future<List<dynamic>> getList(
-    String url, {
-    String? token,
-  }) async {
-    final response = await _safeRequest(() => _client.get(
-      Uri.parse(url),
-      headers: _headers(token: token),
-    ));
+  static Future<List<dynamic>> getList(String url, {String? token}) async {
+    final response = await _safeRequest(
+      () => _client.get(Uri.parse(url), headers: _headers(token: token)),
+    );
     return _handleListResponse(response);
   }
 
@@ -43,11 +35,13 @@ class ApiService {
     Map<String, dynamic> body, {
     String? token,
   }) async {
-    final response = await _safeRequest(() => _client.post(
-      Uri.parse(url),
-      headers: _headers(token: token),
-      body: jsonEncode(body),
-    ));
+    final response = await _safeRequest(
+      () => _client.post(
+        Uri.parse(url),
+        headers: _headers(token: token),
+        body: jsonEncode(body),
+      ),
+    );
     return _handleResponse(response);
   }
 
@@ -56,11 +50,13 @@ class ApiService {
     Map<String, dynamic> body, {
     String? token,
   }) async {
-    final response = await _safeRequest(() => _client.put(
-      Uri.parse(url),
-      headers: _headers(token: token),
-      body: jsonEncode(body),
-    ));
+    final response = await _safeRequest(
+      () => _client.put(
+        Uri.parse(url),
+        headers: _headers(token: token),
+        body: jsonEncode(body),
+      ),
+    );
     return _handleResponse(response);
   }
 
@@ -69,23 +65,59 @@ class ApiService {
     Map<String, dynamic> body, {
     String? token,
   }) async {
-    final response = await _safeRequest(() => _client.patch(
-      Uri.parse(url),
-      headers: _headers(token: token),
-      body: jsonEncode(body),
-    ));
+    final response = await _safeRequest(
+      () => _client.patch(
+        Uri.parse(url),
+        headers: _headers(token: token),
+        body: jsonEncode(body),
+      ),
+    );
     return _handleResponse(response);
   }
 
   static Future<void> delete(String url, {String? token}) async {
-    final response = await _safeRequest(() => _client.delete(
-      Uri.parse(url),
-      headers: _headers(token: token),
-    ));
+    final response = await _safeRequest(
+      () => _client.delete(Uri.parse(url), headers: _headers(token: token)),
+    );
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw ApiException(
         statusCode: response.statusCode,
         message: _extractErrorMessage(response),
+      );
+    }
+  }
+
+  static Future<String> uploadImage(
+    String url,
+    File file, {
+    String? token,
+  }) async {
+    final request = http.MultipartRequest('POST', Uri.parse(url));
+    if (token != null) {
+      request.headers['Authorization'] = 'Bearer $token';
+    }
+
+    request.files.add(await http.MultipartFile.fromPath('file', file.path));
+
+    try {
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final json = jsonDecode(utf8.decode(response.bodyBytes));
+        // Return full URL
+        final baseUrl = url.split('/media/upload')[0];
+        return '$baseUrl${json['url']}';
+      } else {
+        throw ApiException(
+          statusCode: response.statusCode,
+          message: _extractErrorMessage(response),
+        );
+      }
+    } catch (e) {
+      throw ApiException(
+        statusCode: 0,
+        message: 'Resim yüklenirken hata oluştu: $e',
       );
     }
   }
@@ -197,7 +229,8 @@ class ApiService {
   static Map<String, dynamic> _handleResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       try {
-        return jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+        return jsonDecode(utf8.decode(response.bodyBytes))
+            as Map<String, dynamic>;
       } on FormatException {
         throw ApiException(
           statusCode: response.statusCode,
