@@ -60,6 +60,10 @@ class ApiConstants {
   // Settings — sadece üyeler
   static const String mySettings = '$baseUrl/settings/me';
 
+  // AI
+  static const String aiGenerateArticle = '$baseUrl/ai/generate-article';
+  static const String aiChat = '$baseUrl/ai/chat';
+
   // Media
   static const String mediaUploadImage = '$baseUrl/media/upload/image';
 }

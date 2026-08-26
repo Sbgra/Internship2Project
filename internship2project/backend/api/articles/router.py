@@ -88,8 +88,7 @@ def _process_language_translation_and_audio(article_id: int, lang: str):
                         try:
                             response = client.models.generate_content(
                                 model='gemini-3-flash-preview',
-                                contents=f"{system_instruction}\n\nÇevrilecek Metin:\n{prompt}",
-                                config=types.GenerateContentConfig(response_mime_type="application/json")
+                                contents=f"{system_instruction}\n\nÇevrilecek Metin:\n{prompt}"
                             )
                             break
                         except Exception as e:
@@ -160,7 +159,7 @@ def _process_language_translation_and_audio(article_id: int, lang: str):
             for attempt in range(max_retries):
                 try:
                     response = client.models.generate_content(
-                        model='gemini-3.1-flash-tts-preview',
+                        model='gemini-2.5-flash-preview-tts',
                         contents=f"Lütfen şu metni akıcı, doğal ve profesyonel bir ses tonuyla {target_lang} dilinde oku ve okumaktan başka bir cevap verme:\n\n{clean_text}",
                         config=types.GenerateContentConfig(response_modalities=["AUDIO"])
                     )
@@ -303,8 +302,7 @@ def get_article(
                     prompt = f"Başlık: {article.title}\nÖzet: {article.summary or ''}\nİçerik:\n{article.content}"
                     response = client.models.generate_content(
                         model='gemini-3-flash-preview',
-                        contents=f"{system_instruction}\n\nÇevrilecek Metin:\n{prompt}",
-                        config=types.GenerateContentConfig(response_mime_type="application/json")
+                        contents=f"{system_instruction}\n\nÇevrilecek Metin:\n{prompt}"
                     )
                     text = response.text.strip()
                     if text.startswith("```json"):

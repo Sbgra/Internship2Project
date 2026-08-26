@@ -6,6 +6,7 @@ import 'package:quill_html_editor/quill_html_editor.dart';
 import '../../../data/services/article_service.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/api_service.dart';
+import '../../../data/services/ai_service.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/theme/app_theme.dart';
 
@@ -104,10 +105,11 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
     setState(() => _loading = true);
     try {
       final token = context.read<AuthService>().token!;
-      final res = await ApiService.post(
-        '${ApiConstants.baseUrl}/ai/generate-article',
-        {'prompt': _titleCtrl.text.trim(), 'language': _selectedLang},
+      final strictPrompt = '${_titleCtrl.text.trim()}\n\nLütfen bu makaleyi SADECE $_selectedLang dilinde yaz ve makale içerisinde $_selectedLang dışında kesinlikle başka hiçbir dil kullanma.';
+      final res = await AIService.generateArticle(
         token: token,
+        prompt: strictPrompt,
+        language: _selectedLang,
       );
       
       _titleCtrl.text = res['title'] ?? _titleCtrl.text;
@@ -205,14 +207,15 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
       currentText = currentText.replaceAll(RegExp(r'<[^>]+>'), ' ').trim();
     }
 
+    final strictContext = currentText.isNotEmpty 
+        ? '$currentText\n\n(Lütfen cevaplarını SADECE $_selectedLang dilinde ver ve başka dil kullanma.)' 
+        : '(Lütfen cevaplarını SADECE $_selectedLang dilinde ver ve başka dil kullanma.)';
+
     try {
-      final res = await ApiService.post(
-        '${ApiConstants.baseUrl}/ai/chat',
-        {
-          'context': currentText,
-          'messages': _chatMessages.map((m) => m.toJson()).toList(),
-        },
+      final res = await AIService.chat(
         token: token,
+        contextText: strictContext,
+        messages: _chatMessages.map((m) => m.toJson()).toList(),
       );
       
       if (mounted) {
@@ -623,7 +626,13 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
                           crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                           children: [
                             Text(
-                              msg.content,
+                              isUser 
+                                  ? msg.content 
+                                  : msg.content
+                                      .replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n')
+                                      .replaceAll(RegExp(r'</p>', caseSensitive: false), '\n\n')
+                                      .replaceAll(RegExp(r'<[^>]+>'), '')
+                                      .trim(),
                               style: TextStyle(color: isUser ? Colors.white : AppTheme.textPrimary),
                             ),
                             if (!isUser) ...[
