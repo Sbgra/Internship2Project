@@ -122,6 +122,40 @@ class ApiService {
     }
   }
 
+  static Future<String> uploadAudio(
+    String url,
+    File file, {
+    String? token,
+  }) async {
+    final request = http.MultipartRequest('POST', Uri.parse(url));
+    if (token != null) {
+      request.headers['Authorization'] = 'Bearer $token';
+    }
+
+    request.files.add(await http.MultipartFile.fromPath('file', file.path));
+
+    try {
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final json = jsonDecode(utf8.decode(response.bodyBytes));
+        final baseUrl = url.split('/media/upload')[0];
+        return '$baseUrl${json['url']}';
+      } else {
+        throw ApiException(
+          statusCode: response.statusCode,
+          message: _extractErrorMessage(response),
+        );
+      }
+    } catch (e) {
+      throw ApiException(
+        statusCode: 0,
+        message: 'Ses dosyası yüklenirken hata oluştu: $e',
+      );
+    }
+  }
+
   // ── Private helpers ────────────────────────────────────────────
 
   /// Ağ hatalarını (timeout, bağlantı kopması) yakalayıp ApiException'a çevirir.

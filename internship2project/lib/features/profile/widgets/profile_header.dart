@@ -18,7 +18,7 @@ class ProfileHeader extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 30,
-                backgroundColor: AppTheme.primary.withOpacity(0.2),
+                backgroundColor: AppTheme.primary.withValues(alpha: 0.2),
                 backgroundImage:
                     profile.profilePicture != null &&
                         profile.profilePicture!.isNotEmpty

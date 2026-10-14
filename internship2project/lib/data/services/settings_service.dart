@@ -18,7 +18,7 @@ class SettingsService {
     return await ApiService.patch(
       ApiConstants.mySettings,
       {
-        if (appIcon != null) 'app_icon': appIcon,
+        'app_icon': ?appIcon,
       },
       token: token,
     );

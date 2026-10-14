@@ -1,32 +1,40 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 // Tüm API endpoint URL'leri burada merkezi olarak yönetilir.
 // Sadece bu dosyayı değiştirerek tüm servisleri güncellemiş olursunuz.
 
 class ApiConstants {
   ApiConstants._(); // instantiate edilemez
 
-  // Android emülatör için 10.0.2.2, Web/Desktop/iOS Sim. için 127.0.0.1 (veya localhost) kullanın.
-  static const String baseUrl = 'http://10.0.2.2:8000'; // Web/Desktop için
+  // Android emülatör için 10.0.2.2, Web/Desktop/iOS Sim. için 127.0.0.1 kullanır.
+  static String get baseUrl {
+    if (!kIsWeb && Platform.isAndroid) {
+      return 'http://10.0.2.2:8000';
+    }
+    return 'http://127.0.0.1:8000';
+  }
 
   // Auth
-  static const String register = '$baseUrl/auth/register';
-  static const String login = '$baseUrl/auth/login';
+  static String get register => '$baseUrl/auth/register';
+  static String get login => '$baseUrl/auth/login';
 
   // Articles
-  static const String publicArticles = '$baseUrl/articles/public';
-  static const String categories = '$baseUrl/articles/categories';
-  static const String articlesBase = '$baseUrl/articles';
-  static const String myArticles = '$baseUrl/articles/my';
+  static String get publicArticles => '$baseUrl/articles/public';
+  static String get categories => '$baseUrl/articles/categories';
+  static String get articlesBase => '$baseUrl/articles';
+  static String get myArticles => '$baseUrl/articles/my';
   static String articleById(int id) => '$baseUrl/articles/$id';
 
   // Feed
-  static const String randomFeed = '$baseUrl/feed/random';
+  static String get randomFeed => '$baseUrl/feed/random';
 
   // Users
   static String userProfile(int id) => '$baseUrl/users/$id/profile';
   static String userArticles(int id) => '$baseUrl/users/$id/articles';
-  static const String myProfile = '$baseUrl/users/me/profile';
-  static const String updateBio = '$baseUrl/users/me/bio';
-  static const String updateProfileCustomization =
+  static String get myProfile => '$baseUrl/users/me/profile';
+  static String get updateBio => '$baseUrl/users/me/bio';
+  static String get updateProfileCustomization =>
       '$baseUrl/users/me/profile_customization';
 
   // Stats — herkes erişebilir
@@ -38,7 +46,7 @@ class ApiConstants {
   static String articleClaps(int id) => '$baseUrl/articles/$id/claps';
 
   // Communities — listeleme herkese, katılma/oluşturma üyelere
-  static const String communitiesBase = '$baseUrl/communities';
+  static String get communitiesBase => '$baseUrl/communities';
   static String communityById(int id) => '$baseUrl/communities/$id';
   static String communityJoin(int id) => '$baseUrl/communities/$id/join';
   static String communityLeave(int id) => '$baseUrl/communities/$id/leave';
@@ -50,20 +58,22 @@ class ApiConstants {
       '$baseUrl/communities/forum/$topicId/posts';
 
   // Magazines — oluşturma/düzenleme üyelere, detay herkese
-  static const String magazinesBase = '$baseUrl/magazines';
-  static const String myMagazines = '$baseUrl/magazines/my';
+  static String get magazinesBase => '$baseUrl/magazines';
+  static String get myMagazines => '$baseUrl/magazines/my';
   static String magazineById(int id) => '$baseUrl/magazines/$id';
   static String magazineArticles(int id) => '$baseUrl/magazines/$id/articles';
   static String magazineRemoveArticle(int magId, int artId) =>
       '$baseUrl/magazines/$magId/articles/$artId';
 
   // Settings — sadece üyeler
-  static const String mySettings = '$baseUrl/settings/me';
+  static String get mySettings => '$baseUrl/settings/me';
 
   // AI
-  static const String aiGenerateArticle = '$baseUrl/ai/generate-article';
-  static const String aiChat = '$baseUrl/ai/chat';
+  static String get aiGenerateArticle => '$baseUrl/ai/generate-article';
+  static String get aiChat => '$baseUrl/ai/chat';
 
   // Media
-  static const String mediaUploadImage = '$baseUrl/media/upload/image';
+  static String get mediaUploadImage => '$baseUrl/media/upload/image';
+  static String get mediaUploadAudio => '$baseUrl/media/upload/audio';
 }
+

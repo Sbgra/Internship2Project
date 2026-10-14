@@ -71,7 +71,7 @@ class _ClapButtonState extends State<ClapButton>
                   border: Border.all(
                     color: canClap
                         ? AppTheme.primary
-                        : AppTheme.textSecondary.withOpacity(0.3),
+                        : AppTheme.textSecondary.withValues(alpha: 0.3),
                     width: 2,
                   ),
                 ),
@@ -85,7 +85,7 @@ class _ClapButtonState extends State<ClapButton>
                         Icons.favorite,
                         color: canClap
                             ? AppTheme.primary
-                            : AppTheme.textSecondary.withOpacity(0.3),
+                            : AppTheme.textSecondary.withValues(alpha: 0.3),
                         size: 24,
                       ),
               ),

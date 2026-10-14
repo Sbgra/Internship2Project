@@ -12,6 +12,34 @@ load_dotenv(dotenv_path=_env_path)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+from sqlmodel import Session
+from core.database import engine
+from core.models import ChatMessage, User
+
+def cleanup_test_bots():
+    try:
+        with Session(engine) as session:
+            session.query(ChatMessage).filter(
+                (ChatMessage.sender_id.like("test_bot_%")) | 
+                (ChatMessage.receiver_id.like("test_bot_%"))
+            ).delete(synchronize_session=False)
+            
+            session.query(User).filter(
+                User.username.like("test_bot_%")
+            ).delete(synchronize_session=False)
+            session.commit()
+            print("Test verileri başarıyla temizlendi.")
+    except Exception as e:
+        print(f"Test verilerini temizlerken hata oluştu: {e}")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Uygulama başlarken test verilerini temizle
+    cleanup_test_bots()
+    yield
+    # Uygulama kapanırken test verilerini temizle
+    cleanup_test_bots()
 
 import core.events
 from core.database import init_db
@@ -28,6 +56,7 @@ from api.highlights.router import router as highlights_router
 from api.media.router import router as media_router
 from api.ai.router import router as ai_router
 from api.comments.router import router as comments_router
+from api.chat.router import router as chat_router
 
 init_db()
 
@@ -35,6 +64,7 @@ app = FastAPI(
     title="MyAPP API",
     description="Makale platformu — sqlite3 + FastAPI",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -58,6 +88,7 @@ app.include_router(settings_router)
 app.include_router(media_router)
 app.include_router(ai_router)
 app.include_router(comments_router)
+app.include_router(chat_router)
 
 
 @app.get("/", tags=["Health"])

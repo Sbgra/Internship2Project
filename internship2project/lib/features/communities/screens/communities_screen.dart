@@ -64,7 +64,7 @@ class _CommunitiesScreenState extends State<CommunitiesScreen> {
                           Icon(
                             Icons.groups_outlined,
                             size: 56,
-                            color: AppTheme.textSecondary.withOpacity(0.5),
+                            color: AppTheme.textSecondary.withValues(alpha: 0.5),
                           ),
                           const SizedBox(height: 16),
                           const Text(
@@ -80,7 +80,7 @@ class _CommunitiesScreenState extends State<CommunitiesScreen> {
                         final c = _communities[index];
                         return ListTile(
                           leading: CircleAvatar(
-                            backgroundColor: AppTheme.primary.withOpacity(0.2),
+                            backgroundColor: AppTheme.primary.withValues(alpha: 0.2),
                             backgroundImage:
                                 (c.image != null && c.image!.isNotEmpty)
                                 ? NetworkImage(c.image!)

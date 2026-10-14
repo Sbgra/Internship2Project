@@ -251,6 +251,7 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
     if (!_isEditorReady) return;
     final currentHtml = await _quillController.getText();
     await _quillController.setText('$currentHtml <p>$htmlContent</p>');
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Editöre eklendi!')));
   }
 
@@ -419,7 +420,7 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
                               ].map((color) {
                                 return GestureDetector(
                                   onTap: () {
-                                    final hex = '#${color.value.toRadixString(16).substring(2, 8)}';
+                                    final hex = '#${color.toARGB32().toRadixString(16).substring(2, 8)}';
                                     _quillController.setFormat(format: 'color', value: hex);
                                     setState(() => _showColorOptions = false);
                                   },
@@ -588,7 +589,7 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
                     value: _isPublic,
                     onChanged: (v) => setState(() => _isPublic = v),
                     contentPadding: EdgeInsets.zero,
-                    activeColor: AppTheme.primary,
+                    activeThumbColor: AppTheme.primary,
                   ),
                   const SizedBox(height: 80),
                 ],

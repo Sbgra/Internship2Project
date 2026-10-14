@@ -59,7 +59,10 @@ class _FeedScreenState extends State<FeedScreen>
   }
 
   Future<void> _loadRandom() async {
-    setState(() { _loadingRandom = true; _randomError = null; });
+    setState(() {
+      _loadingRandom = true;
+      _randomError = null;
+    });
     try {
       final data = await ArticleService.getRandomFeed(
         limit: 10,
@@ -76,7 +79,10 @@ class _FeedScreenState extends State<FeedScreen>
   }
 
   Future<void> _loadPublic() async {
-    setState(() { _loadingPublic = true; _publicError = null; });
+    setState(() {
+      _loadingPublic = true;
+      _publicError = null;
+    });
     try {
       final data = await ArticleService.getPublicArticles(
         limit: 30,
@@ -138,8 +144,13 @@ class _FeedScreenState extends State<FeedScreen>
                         selected: isSelected,
                         selectedColor: Colors.black12,
                         checkmarkColor: AppTheme.textPrimary,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                         side: BorderSide.none,
                         backgroundColor: AppTheme.divider,
                         onSelected: (selected) {
@@ -185,6 +196,11 @@ class _FeedScreenState extends State<FeedScreen>
       appBar: AppBar(
         title: const Text('MyPlatform'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.chat),
+            onPressed: () => Navigator.of(context).pushNamed('/chat'),
+            tooltip: 'Chat',
+          ),
           // Kategori filtre butonu
           Stack(
             alignment: Alignment.center,
@@ -206,7 +222,11 @@ class _FeedScreenState extends State<FeedScreen>
                     ),
                     child: Text(
                       '${_selectedCategories.length}',
-                      style: const TextStyle(color: AppTheme.background, fontSize: 10, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: AppTheme.background,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -219,15 +239,22 @@ class _FeedScreenState extends State<FeedScreen>
             )
           else
             TextButton(
-              onPressed: () => Navigator.of(context)
-                  .pushNamed('/profile', arguments: auth.currentUser!.id),
+              onPressed: () => Navigator.of(
+                context,
+              ).pushNamed('/profile', arguments: auth.currentUser!.id),
               child: Text(auth.currentUser!.username),
             ),
         ],
         bottom: TabBar(
           controller: _tabController,
-          labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          unselectedLabelStyle: const TextStyle(fontSize: 16, color: AppTheme.textSecondary),
+          labelStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontSize: 16,
+            color: AppTheme.textSecondary,
+          ),
           indicatorColor: AppTheme.textPrimary,
           indicatorWeight: 2,
           tabs: const [
@@ -257,12 +284,23 @@ class _FeedScreenState extends State<FeedScreen>
                 runSpacing: 4,
                 children: _selectedCategories.map((cat) {
                   return Chip(
-                    label: Text(cat, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                    label: Text(
+                      cat,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                     deleteIcon: const Icon(Icons.close, size: 16),
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     backgroundColor: AppTheme.divider,
                     side: BorderSide.none,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     onDeleted: () {
                       setState(() => _selectedCategories.remove(cat));
                       _loadRandom();
@@ -281,43 +319,43 @@ class _FeedScreenState extends State<FeedScreen>
                 _loadingRandom
                     ? const LoadingIndicator()
                     : _randomError != null
-                        ? _buildErrorView(_randomError!, _loadRandom)
-                        : RefreshIndicator(
-                            onRefresh: _loadRandom,
-                            child: _randomFeed.isEmpty
-                                ? const Center(child: Text('Henüz makale yok'))
-                                : ListView.builder(
-                                    itemCount: _randomFeed.length,
-                                    itemBuilder: (context, i) => ArticleCard(
-                                      article: _randomFeed[i],
-                                      onTap: () => Navigator.of(context).pushNamed(
-                                        '/article',
-                                        arguments: _randomFeed[i].id,
-                                      ),
-                                    ),
+                    ? _buildErrorView(_randomError!, _loadRandom)
+                    : RefreshIndicator(
+                        onRefresh: _loadRandom,
+                        child: _randomFeed.isEmpty
+                            ? const Center(child: Text('Henüz makale yok'))
+                            : ListView.builder(
+                                itemCount: _randomFeed.length,
+                                itemBuilder: (context, i) => ArticleCard(
+                                  article: _randomFeed[i],
+                                  onTap: () => Navigator.of(context).pushNamed(
+                                    '/article',
+                                    arguments: _randomFeed[i].id,
                                   ),
-                          ),
+                                ),
+                              ),
+                      ),
 
                 // Tüm public makaleler
                 _loadingPublic
                     ? const LoadingIndicator()
                     : _publicError != null
-                        ? _buildErrorView(_publicError!, _loadPublic)
-                        : RefreshIndicator(
-                            onRefresh: _loadPublic,
-                            child: _publicArticles.isEmpty
-                                ? const Center(child: Text('Henüz makale yok'))
-                                : ListView.builder(
-                                    itemCount: _publicArticles.length,
-                                    itemBuilder: (context, i) => ArticleCard(
-                                      article: _publicArticles[i],
-                                      onTap: () => Navigator.of(context).pushNamed(
-                                        '/article',
-                                        arguments: _publicArticles[i].id,
-                                      ),
-                                    ),
+                    ? _buildErrorView(_publicError!, _loadPublic)
+                    : RefreshIndicator(
+                        onRefresh: _loadPublic,
+                        child: _publicArticles.isEmpty
+                            ? const Center(child: Text('Henüz makale yok'))
+                            : ListView.builder(
+                                itemCount: _publicArticles.length,
+                                itemBuilder: (context, i) => ArticleCard(
+                                  article: _publicArticles[i],
+                                  onTap: () => Navigator.of(context).pushNamed(
+                                    '/article',
+                                    arguments: _publicArticles[i].id,
                                   ),
-                          ),
+                                ),
+                              ),
+                      ),
               ],
             ),
           ),
@@ -333,12 +371,19 @@ class _FeedScreenState extends State<FeedScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: AppTheme.textSecondary),
+            const Icon(
+              Icons.error_outline,
+              size: 48,
+              color: AppTheme.textSecondary,
+            ),
             const SizedBox(height: 16),
             Text(
               error,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 15, color: AppTheme.textSecondary),
+              style: const TextStyle(
+                fontSize: 15,
+                color: AppTheme.textSecondary,
+              ),
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
@@ -352,4 +397,3 @@ class _FeedScreenState extends State<FeedScreen>
     );
   }
 }
-

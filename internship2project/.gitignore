@@ -44,3 +44,11 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 .env
+
+# SQLite Temporary Cache
+*.db-shm
+*.db-wal
+
+# Backend media caches
+backend/data/audios/
+backend/data/images/

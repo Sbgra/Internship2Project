@@ -6,9 +6,15 @@ import sqlite3
 from sqlmodel import SQLModel, create_engine, Session
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
+from pathlib import Path
 import core.models  # Modellerin belleğe yüklenmesi için gerekli
 
-DATABASE_URL = "sqlite:///./data/articles.db"
+# Veritabanının her zaman 'backend/data/articles.db' konumunda olmasını sağla
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "data"
+DATA_DIR.mkdir(exist_ok=True)
+DB_PATH = DATA_DIR / "articles.db"
+DATABASE_URL = f"sqlite:///{DB_PATH.as_posix()}"
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 
@@ -16,6 +22,8 @@ engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.execute("PRAGMA journal_mode=WAL")
+    cursor.execute("PRAGMA synchronous=NORMAL")
     cursor.close()
 
 def get_db():

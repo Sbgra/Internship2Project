@@ -132,7 +132,9 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
                 if (ctx.mounted) Navigator.pop(ctx);
                 _load();
               } catch (e) {
-                ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('Hata: $e')));
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('Hata: $e')));
+                }
               }
             },
             child: const Text('Oluştur'),
@@ -268,7 +270,7 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: _topics.length,
-                        separatorBuilder: (_, __) => const Divider(color: AppTheme.divider),
+                        separatorBuilder: (_, _) => const Divider(color: AppTheme.divider),
                         itemBuilder: (context, index) {
                           final topic = _topics[index];
                           return ListTile(

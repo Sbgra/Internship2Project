@@ -18,6 +18,8 @@ import 'features/magazines/screens/create_magazine_screen.dart';
 import 'features/profile/screens/edit_profile_screen.dart';
 import 'features/settings/screens/app_icon_settings_screen.dart';
 import 'shared/widgets/loading_indicator.dart';
+import 'features/chat/chat_screen.dart';
+import 'features/chat/users_list_screen.dart';
 
 /// Uygulamanın kök widget'ı.
 /// Provider, tema ve routing burada tanımlanır.
@@ -92,6 +94,17 @@ class App extends StatelessWidget {
       case '/edit-profile':
         return MaterialPageRoute(
             builder: (_) => const EditProfileScreen());
+      case '/chat':
+        return MaterialPageRoute(builder: (_) => const UsersListScreen());
+      case '/chat-detail':
+        final args = settings.arguments as Map<String, dynamic>? ?? {};
+        return MaterialPageRoute(
+          builder: (_) => ChatScreen(
+            receiverId: args['receiverId'] ?? '',
+            receiverName: args['receiverName'] ?? 'Kullanıcı',
+            receiverAvatar: args['receiverAvatar'],
+          ),
+        );
       default:
         return MaterialPageRoute(builder: (_) => const FeedScreen());
     }

@@ -508,7 +508,7 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
                 children: [
                   CircleAvatar(
                     radius: 18,
-                    backgroundColor: AppTheme.primary.withOpacity(0.2),
+                    backgroundColor: AppTheme.primary.withValues(alpha: 0.2),
                     backgroundImage:
                         article.author.profilePicture != null &&
                             article.author.profilePicture!.isNotEmpty

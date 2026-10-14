@@ -61,7 +61,7 @@ class _MagazinesScreenState extends State<MagazinesScreen> {
                           Icon(
                             Icons.menu_book_outlined,
                             size: 56,
-                            color: AppTheme.textSecondary.withOpacity(0.5),
+                            color: AppTheme.textSecondary.withValues(alpha: 0.5),
                           ),
                           const SizedBox(height: 16),
                           const Text(

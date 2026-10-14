@@ -113,7 +113,7 @@ class CommentTreeWidget extends StatelessWidget {
             ],
           ),
           if (comment.replies.isNotEmpty)
-            ...comment.replies.map((reply) => _buildCommentNode(reply, depth + 1)).toList(),
+            ...comment.replies.map((reply) => _buildCommentNode(reply, depth + 1)),
         ],
       ),
     );

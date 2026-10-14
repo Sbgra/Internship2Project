@@ -13,6 +13,15 @@ from api.auth.service import get_user_by_id, update_bio, update_profile
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
+@router.get("/", response_model=List[UserPublic])
+def get_all_users(session: Session = Depends(get_db)):
+    """Sistemdeki tüm kullanıcıları listeler."""
+    from sqlmodel import select
+    from core.models import User
+    
+    users = session.exec(select(User)).all()
+    return [UserPublic.model_validate(u) for u in users]
+
 @router.get("/me/profile", response_model=UserPublic)
 def get_my_profile(current_user = Depends(get_current_user)):
     """Giriş yapan kullanıcının kendi profili."""

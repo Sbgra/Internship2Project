@@ -101,6 +101,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
         text,
         parentId: _replyingToId,
       );
+      if (!mounted) return;
       _commentCtrl.clear();
       setState(() => _replyingToId = null);
       FocusScope.of(context).unfocus();
@@ -199,7 +200,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                       color: AppTheme.surface,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           offset: const Offset(0, -2),
                           blurRadius: 4,
                         ),

@@ -1,4 +1,5 @@
 /// Topluluk modelleri — backend CommunityListItem / CommunityResponse ile uyumlu.
+library;
 
 class CommunityListItemModel {
   final int id;

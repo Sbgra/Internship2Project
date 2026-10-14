@@ -59,7 +59,7 @@ class _OfflineArticlesScreenState extends State<OfflineArticlesScreen> {
                   Icon(
                     Icons.cloud_off,
                     size: 56,
-                    color: AppTheme.textSecondary.withOpacity(0.5),
+                    color: AppTheme.textSecondary.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 16),
                   const Text(

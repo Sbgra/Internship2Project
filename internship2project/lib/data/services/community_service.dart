@@ -42,7 +42,7 @@ class CommunityService {
       ApiConstants.communitiesBase,
       {
         'name': name,
-        if (description != null) 'description': description,
+        'description': ?description,
         if (image != null && image.isNotEmpty) 'image': image,
       },
       token: token,

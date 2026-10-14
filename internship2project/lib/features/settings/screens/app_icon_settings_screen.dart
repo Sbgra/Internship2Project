@@ -134,7 +134,7 @@ class _AppIconSettingsScreenState extends State<AppIconSettingsScreen> {
                                   width: 48,
                                   height: 48,
                                   decoration: BoxDecoration(
-                                    color: opt.color.withOpacity(0.2),
+                                    color: opt.color.withValues(alpha: 0.2),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Icon(

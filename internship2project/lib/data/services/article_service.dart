@@ -91,11 +91,11 @@ class ArticleService {
       {
         'title': title,
         'content': content,
-        if (summary != null) 'summary': summary,
-        if (coverImage != null) 'cover_image': coverImage,
+        'summary': ?summary,
+        'cover_image': ?coverImage,
         'is_public': isPublic,
-        if (categories != null) 'categories': categories,
-        if (targetLanguages != null) 'target_languages': targetLanguages,
+        'categories': ?categories,
+        'target_languages': ?targetLanguages,
       },
       token: token,
     );
@@ -112,11 +112,11 @@ class ArticleService {
     bool? isPublic,
   }) async {
     final body = <String, dynamic>{
-      if (title != null) 'title': title,
-      if (content != null) 'content': content,
-      if (summary != null) 'summary': summary,
-      if (coverImage != null) 'cover_image': coverImage,
-      if (isPublic != null) 'is_public': isPublic,
+      'title': ?title,
+      'content': ?content,
+      'summary': ?summary,
+      'cover_image': ?coverImage,
+      'is_public': ?isPublic,
     };
     final data = await ApiService.put(
       ApiConstants.articleById(articleId),

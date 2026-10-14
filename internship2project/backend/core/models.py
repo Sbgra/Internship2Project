@@ -231,3 +231,11 @@ class TranslatedArticle(SQLModel, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     article: Article = Relationship(back_populates="translations")
+
+class ChatMessage(SQLModel, table=True):
+    __tablename__ = "chat_messages"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    sender_id: str = Field(index=True)
+    receiver_id: str = Field(index=True)
+    content: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

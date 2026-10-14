@@ -34,8 +34,8 @@ class MagazineService {
       ApiConstants.magazinesBase,
       {
         'title': title,
-        if (description != null) 'description': description,
-        if (image != null) 'image': image,
+        'description': ?description,
+        'image': ?image,
       },
       token: token,
     );
